@@ -25,6 +25,7 @@ import androidx.compose.ui.unit.times
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.application
 import kotlinx.coroutines.delay
+import java.lang.Float.max
 import kotlin.random.Random
 
 typealias Snake = SnapshotStateList<Point>
@@ -72,8 +73,8 @@ private var boost by mutableStateOf(false)
 private var gameOver by mutableStateOf(false)
 private var reset by mutableStateOf(false)
 
-private var highScore by mutableStateOf(0)
-private var score by mutableStateOf(0)
+private var highScore by mutableStateOf(0f)
+private var score by mutableStateOf(0f)
 
 @Composable
 fun Game() {
@@ -135,11 +136,18 @@ fun Game() {
             }
 
             if (snake.last() == food) {
+                score += 50
                 food = randomPoint(snake)
             } else {
+                score += 1
                 snake.removeAt(0)
             }
 
+            if (boost) {
+                score -= .75f
+            }
+
+            highScore = max(score, highScore)
             moveSnake = false
         }
 
@@ -226,12 +234,12 @@ fun BoxScope.DrawKeys() = Column(
 
 @Composable
 fun BoxScope.DrawScore() = Text(
-    score.toString(), color = Color.White.copy(.8f), modifier = Modifier.align(Alignment.TopStart)
+   "Score: %.1f".formatted(score), color = Color.White.copy(.8f), modifier = Modifier.align(Alignment.TopStart)
 )
 
 @Composable
 fun BoxScope.DrawHighScore() = Text(
-    highScore.toString(), color = Color.White.copy(.8f), modifier = Modifier.align(Alignment.TopEnd)
+    "High score: %.1f".formatted(highScore), color = Color.White.copy(.8f), modifier = Modifier.align(Alignment.TopEnd)
 )
 
 @Composable
@@ -265,7 +273,7 @@ fun reset() {
     reset = false
     gameOver = false
     direction = RIGHT
-    score = 0
+    score = 0f
 }
 
 private val cellSize
